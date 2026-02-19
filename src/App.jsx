@@ -4,6 +4,18 @@ import { useState, useEffect, useRef, useCallback, createContext, useContext, Ch
 const LangContext = createContext("ko");
 function useLang() { return useContext(LangContext); }
 
+/* ─── Mobile Hook ─── */
+function useIsMobile(bp = 768) {
+  const [m, setM] = useState(() => window.innerWidth < bp);
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width:${bp - 1}px)`);
+    const h = (e) => setM(e.matches);
+    mql.addEventListener("change", h);
+    return () => mql.removeEventListener("change", h);
+  }, [bp]);
+  return m;
+}
+
 /* ─── Translations ─── */
 const i18n = {
   ko: {
@@ -25,7 +37,7 @@ const i18n = {
     founderName:"이승태",
 
     whyP1:"IT 채용 시장의 정보 비대칭은 심각합니다. 구직자에게 진짜 필요한 건 공고 목록이 아니라, '내 이력서가 어디에 얼마나 맞는지', '연봉 실태는 어떤지', '협상은 어떻게 해야 하는지'입니다. SPENCER는 이 간극을 AI로 무너뜨리는 서비스입니다.",
-    whyP2:"2025년 11월 Claude Opus 4.5를 접하고, 한 달 뒤 퇴사했습니다. 바이브 코딩으로 자연어 채용검색 서비스 Jobbot(jobbot.kr)을 만들어 배포했고, 그 과정에서 구직자가 진짜 원하는 건 '검색'이 아니라 '분석'이라는 걸 발견했습니다. SPENCER는 그렇게 시작됐고, 현재 MVP를 배포한 상태입니다.",
+    whyP2:"바이브 코딩으로 자연어 채용검색 서비스 Jobbot(jobbot.kr)을 만들어 배포했을때, 구직자가 진짜 원하는 건 '검색'이 아니라 '분석'이라는 걸 발견했습니다. SPENCER는 그렇게 시작했습니다.",
     whyP3:"솔직히 말씀드리면, 제품을 빠르게 만드는 건 자신 있지만, 실제 유저 트래픽을 만들고 비즈니스로 작동시킨 경험은 아직 없습니다. 창업에서 가장 어려운 지점이 바로 여기라는 걸 알고 있습니다.",
     whyP4:"그 경험을 압축적으로 쌓는 데 해쉬드바이브랩스의 환경과 네트워크가 결정적이라고 판단했습니다. PMF를 찾을 때까지 빠르게 실험하고 유연하게 피벗할 준비가 되어 있습니다. 프로그램 기간 내에 유료 전환율을 검증하고, 반복 가능한 성장 모델을 만드는 것이 목표입니다.",
     menuTitle:"명령어 선택", menuHint:"↵ 선택",
@@ -54,7 +66,7 @@ const i18n = {
     founderName:"Seungtae Lee",
 
     whyP1:"The IT job market has a severe information asymmetry problem. What job seekers actually need isn't a list of postings — it's knowing how well their resume fits, what the real salary situation is, and how to negotiate. SPENCER breaks down this gap with AI.",
-    whyP2:"In November 2025, I encountered Claude Opus 4.5 and quit my job a month later. I built and deployed Jobbot (jobbot.kr), a natural language job search service, through vibe coding. In the process, I discovered that what job seekers truly want isn't search — it's analysis. That's how SPENCER started, and the MVP is now live.",
+    whyP2:"When I built and deployed Jobbot (jobbot.kr), a natural language job search service, through vibe coding, I discovered that what job seekers truly want isn't search — it's analysis. That's how SPENCER started.",
     whyP3:"Honestly, I'm confident in building products fast, but I haven't yet generated real user traffic or made a business work. I know this is exactly the hardest part of building a startup.",
     whyP4:"I believe Hashed Vibe Labs' environment and network are critical for compressing that learning curve. I'm ready to experiment fast and pivot flexibly until PMF is found. My goal within the program is to validate paid conversion and build a repeatable growth model.",
     menuTitle:"Select Command", menuHint:"↵ Select",
@@ -148,43 +160,52 @@ function CLIReveal({ children, interval = 60 }) {
 }
 
 /* ═══ SRCL Primitives ═══ */
-const Card = ({ title, titleR, children, st }) => (
-  <div style={{ border:`1px solid ${C.border}`, background:C.surface, marginBottom:"14px", ...st }}>
-    {title && (
-      <div style={{ padding:"10px 16px", borderBottom:`1px solid ${C.border}`, background:C.raised, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-        <span style={{ fontSize:"14px", color:C.dim, fontWeight:600, letterSpacing:"0.8px", textTransform:"uppercase" }}>{title}</span>
-        {titleR && <span style={{ fontSize:"13px", color:C.faint }}>{titleR}</span>}
-      </div>
-    )}
-    <div style={{ padding:"16px 18px" }}>{children}</div>
-  </div>
-);
+const Card = ({ title, titleR, children, st }) => {
+  const mob = useIsMobile();
+  return (
+    <div style={{ border:`1px solid ${C.border}`, background:C.surface, marginBottom:"14px", ...st }}>
+      {title && (
+        <div style={{ padding:mob?"10px 12px":"10px 16px", borderBottom:`1px solid ${C.border}`, background:C.raised, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+          <span style={{ fontSize:"14px", color:C.dim, fontWeight:600, letterSpacing:"0.8px", textTransform:"uppercase" }}>{title}</span>
+          {titleR && <span style={{ fontSize:"13px", color:C.faint }}>{titleR}</span>}
+        </div>
+      )}
+      <div style={{ padding:mob?"12px 12px":"16px 18px" }}>{children}</div>
+    </div>
+  );
+};
 
-const Table = ({ hd, rows, w }) => (
-  <div style={{ border:`1px solid ${C.border}`, background:C.surface, marginBottom:"14px", overflow:"hidden" }}>
-    <table style={{ width:"100%", borderCollapse:"collapse", fontFamily:F }}>
-      <thead><tr style={{ background:C.raised }}>
-        {hd.map((h,i) => <th key={i} style={{ padding:"10px 14px", fontSize:"14px", color:C.dim, fontWeight:600, letterSpacing:"0.5px", textTransform:"uppercase", textAlign:"left", borderBottom:`1px solid ${C.border}`, width:w?.[i] }}>{h}</th>)}
-      </tr></thead>
-      <tbody>
-        {rows.map((r,ri) => <tr key={ri}>
-          {r.map((c,ci) => <td key={ci} style={{ padding:"8px 14px", fontSize:"15px", color:ci===0?C.text:C.dim, borderBottom:ri<rows.length-1?`1px solid ${C.border}`:"none", width:w?.[ci] }}>{c}</td>)}
-        </tr>)}
-      </tbody>
-    </table>
-  </div>
-);
+const Table = ({ hd, rows, w }) => {
+  const mob = useIsMobile();
+  return (
+    <div style={{ border:`1px solid ${C.border}`, background:C.surface, marginBottom:"14px", overflow:"hidden", ...(mob?{overflowX:"auto"}:{}) }}>
+      <table style={{ width:"100%", borderCollapse:"collapse", fontFamily:F }}>
+        <thead><tr style={{ background:C.raised }}>
+          {hd.map((h,i) => <th key={i} style={{ padding:mob?"8px 10px":"10px 14px", fontSize:mob?"13px":"14px", color:C.dim, fontWeight:600, letterSpacing:"0.5px", textTransform:"uppercase", textAlign:"left", borderBottom:`1px solid ${C.border}`, width:mob?undefined:w?.[i] }}>{h}</th>)}
+        </tr></thead>
+        <tbody>
+          {rows.map((r,ri) => <tr key={ri}>
+            {r.map((c,ci) => <td key={ci} style={{ padding:mob?"8px 10px":"8px 14px", fontSize:mob?"13px":"15px", color:ci===0?C.text:C.dim, borderBottom:ri<rows.length-1?`1px solid ${C.border}`:"none", width:mob?undefined:w?.[ci] }}>{c}</td>)}
+          </tr>)}
+        </tbody>
+      </table>
+    </div>
+  );
+};
 
-const KV = ({ k, v, link }) => (
-  <div style={{ display:"flex", gap:"12px", fontSize:"15px", lineHeight:"2.2" }}>
-    <span style={{ color:C.dim, minWidth:"120px" }}>{k}</span>
-    {link ? (
-      <a href={v.startsWith("http")?v:`https://${v}`} target="_blank" rel="noopener noreferrer" style={{ color:C.cyan, textDecoration:"underline", cursor:"pointer" }}>{v}</a>
-    ) : (
-      <span style={{ color:C.text }}>{v}</span>
-    )}
-  </div>
-);
+const KV = ({ k, v, link }) => {
+  const mob = useIsMobile();
+  return (
+    <div style={{ display:"flex", flexDirection:mob?"column":"row", gap:mob?"4px":"12px", fontSize:"15px", lineHeight:"2.2" }}>
+      <span style={{ color:C.dim, minWidth:mob?"auto":"120px" }}>{k}</span>
+      {link ? (
+        <a href={v.startsWith("http")?v:`https://${v}`} target="_blank" rel="noopener noreferrer" style={{ color:C.cyan, textDecoration:"underline", cursor:"pointer" }}>{v}</a>
+      ) : (
+        <span style={{ color:C.text }}>{v}</span>
+      )}
+    </div>
+  );
+};
 
 
 /* ═══ Deadline Countdown ═══ */
@@ -207,16 +228,20 @@ function Countdown() {
 
 function HomeSection() {
   const t = useT();
+  const mob = useIsMobile();
   return <CLIReveal interval={40}>
     <div style={{ margin:"16px 0 10px", fontFamily:F }}>
       <span style={{ color:C.faint, fontSize:"16px" }}>{"// "}</span>
       <span style={{ color:"#4deeea", fontSize:"16px", letterSpacing:"3px", fontWeight:600 }}>APPLY FOR</span>
     </div>
-    <pre style={{ color:C.primary, fontSize:"10.5px", lineHeight:"1.15", fontFamily:F, margin:"0 0 20px", opacity:0.85, letterSpacing:"0.5px" }}>{VIBE_ASCII}</pre>
+    {mob
+      ? <div style={{ color:C.primary, fontSize:"18px", fontWeight:700, margin:"0 0 20px", letterSpacing:"1px" }}>HASHED VIBE LABS</div>
+      : <pre style={{ color:C.primary, fontSize:"10.5px", lineHeight:"1.15", fontFamily:F, margin:"0 0 20px", opacity:0.85, letterSpacing:"0.5px" }}>{VIBE_ASCII}</pre>
+    }
     <div style={{ color:C.primary, fontSize:"16px", margin:"0 0 22px" }}>
       —— SPENCER applying for 1st Batch 2026: Seoul ——
     </div>
-    <div style={{ border:`1px solid ${C.primary}40`, borderRadius:"2px", padding:"14px 18px", background:C.pBg, marginBottom:"22px" }}>
+    <div style={{ border:`1px solid ${C.primary}40`, borderRadius:"2px", padding:mob?"12px 14px":"14px 18px", background:C.pBg, marginBottom:"22px" }}>
       <span style={{ color:C.primary, fontSize:"16px" }}>{t("homeTagline")}</span>
     </div>
     <div style={{ fontSize:"16px", lineHeight:"2.2", color:C.text, marginBottom:"22px" }}>
@@ -226,7 +251,7 @@ function HomeSection() {
     </div>
     <div style={{ borderTop:`1px solid ${C.border}`, paddingTop:"16px" }}>
       <div style={{ color:C.dim, fontSize:"14px", marginBottom:"12px" }}>{t("homeGuide")}</div>
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:"2px 0" }}>
+      <div style={{ display:"grid", gridTemplateColumns:mob?"1fr":"1fr 1fr", gap:"2px 0" }}>
         {CMD_KEYS.filter(c=>c.key!=="clear").map(c => (
           <div key={c.key} style={{ fontSize:"15px", lineHeight:"2.2" }}>
             <span style={{ color:C.primary }}>{c.n} </span>
@@ -243,18 +268,18 @@ function AboutSection() {
   const t = useT();
   return <CLIReveal>
     <Card title="applicant · spencer">
-      <div style={{ color:C.primary, fontWeight:700, fontSize:"20px", marginBottom:"10px" }}>SPENCER</div>
+      <a href="https://spencer.ai.kr" target="_blank" rel="noopener noreferrer" style={{ color:C.primary, fontWeight:700, fontSize:"20px", marginBottom:"10px", display:"block", textDecoration:"none" }}>SPENCER ↗</a>
       <div style={{ color:C.text, fontSize:"16px", marginBottom:"12px" }}>{t("aboutShort")}</div>
       <div style={{ color:C.dim, fontSize:"15px", lineHeight:"2" }}>
         {t("aboutDesc")}
       </div>
     </Card>
     <Card title="info">
+      <KV k="Live URL" v="spencer.ai.kr" link />
       <KV k="First Commit" v="2026.01.28" />
-      <KV k="Stage" v="MVP Deployed" />
+      <KV k="Stage" v="MVP Deployed (2026.02.13)" />
       <KV k="Location" v="Seoul, South Korea" />
       <KV k={<><IconGitHub />Repo</>} v="github.com/stleeqwe/spencer" link />
-      <KV k="Live URL" v="spencer.ai.kr" link />
     </Card>
   </CLIReveal>;
 }
@@ -280,14 +305,15 @@ function TeamSection() {
     ["5SEC","Random Video Chat iOS App","Swift · Firebase · Agora SDK · StoreKit 2","TestFlight",null],
     ["hyperai","Multi-Agent AI System","Python · Claude · GPT · Gemini · Grok","GitHub","https://github.com/stleeqwe/hyperai"],
   ];
+  const mob = useIsMobile();
   return <CLIReveal>
-    <div style={{ display:"flex", gap:"16px", marginBottom:"14px" }}>
+    <div style={{ display:"flex", gap:mob?"8px":"16px", marginBottom:"14px" }}>
       {[
         { k:lang==="ko"?"인원":"Members", v:"1" },
         { k:lang==="ko"?"풀타임":"Full-time", v:"1" },
         { k:"Social", v:<a href="https://github.com/stleeqwe" target="_blank" rel="noopener noreferrer" style={{ color:C.cyan, textDecoration:"underline" }}>GitHub ↗</a> },
       ].map((item,i) => (
-        <div key={i} style={{ flex:1, padding:"12px 16px", border:`1px solid ${C.border}`, background:C.surface }}>
+        <div key={i} style={{ flex:1, padding:mob?"10px 10px":"12px 16px", border:`1px solid ${C.border}`, background:C.surface }}>
           <div style={{ color:C.faint, fontSize:"12px", textTransform:"uppercase", letterSpacing:"0.5px" }}>{item.k}</div>
           <div style={{ color:C.primary, fontSize:"20px", fontWeight:700, marginTop:"4px" }}>{item.v}</div>
         </div>
@@ -309,7 +335,7 @@ function TeamSection() {
     <Card title={lang==="ko"?"경력 · IT 직군":"career · IT"} titleR={lang==="ko"?"총 5년 8개월":"5y 8m total"}>
       {CAREER.map((c,i) => (
         <div key={i} style={{ borderBottom:i<CAREER.length-1?`1px solid ${C.border}`:"none", padding:"8px 0" }}>
-          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+          <div style={{ display:"flex", flexDirection:mob?"column":"row", justifyContent:"space-between", alignItems:mob?"flex-start":"center" }}>
             <div>
               <span style={{ color:C.text, fontWeight:600, fontSize:"15px" }}>{c[1]}</span>
               <span style={{ color:C.dim, fontSize:"14px" }}> · {c[2]}</span>
@@ -340,21 +366,99 @@ function TeamSection() {
 }
 
 function DemoVideoSection() {
+  const mob = useIsMobile();
+  const SCREENSHOTS = [
+    { src:"/ss-1.png", label:"프로필 분석" },
+    { src:"/ss-2.png", label:"시장 분석" },
+    { src:"/ss-3.png", label:"에이전트 분석" },
+    { src:"/ss-4.png", label:"추천 공고" },
+    { src:"/ss-5.png", label:"추천 공고 목록" },
+    { src:"/ss-6.png", label:"협상 가이드" },
+    { src:"/ss-7.png", label:"커리어 인사이트" },
+    { src:"/ss-8.png", label:"Ask SPENCER" },
+    { src:"/ss-9.png", label:"기업 분석" },
+    { src:"/ss-10.png", label:"포지션" },
+    { src:"/ss-11.png", label:"적합도" },
+    { src:"/ss-12.png", label:"지원 전략" },
+    { src:"/ss-13.png", label:"맞춤 지원서" },
+    { src:"/ss-14.png", label:"맞춤 지원서 상세" },
+  ];
+  const [open, setOpen] = useState(false);
+  const [popupIdx, setPopupIdx] = useState(-1);
+  const touchRef = useRef(null);
+  const popup = popupIdx >= 0 ? SCREENSHOTS[popupIdx] : null;
+  const goPrev = () => setPopupIdx(i => (i - 1 + SCREENSHOTS.length) % SCREENSHOTS.length);
+  const goNext = () => setPopupIdx(i => (i + 1) % SCREENSHOTS.length);
+  const onTouchStart = (e) => { touchRef.current = e.touches[0].clientX; };
+  const onTouchEnd = (e) => {
+    if (touchRef.current === null) return;
+    const dx = e.changedTouches[0].clientX - touchRef.current;
+    touchRef.current = null;
+    if (dx > 50) goPrev();
+    else if (dx < -50) goNext();
+  };
   return <>
     <a href="https://youtu.be/9KXnv_6cNFA" target="_blank" rel="noopener noreferrer" style={{ textDecoration:"none", display:"block" }}>
       <div style={{ border:`1px solid ${C.border}`, marginBottom:"14px", cursor:"pointer", transition:"border-color 0.15s" }}>
-        <div style={{ height:"240px", background:`url('/demo-thumbnail.png') center/cover no-repeat` }} />
+        <div style={{ height:mob?"180px":"240px", background:`url('/demo-thumbnail.png') center/cover no-repeat` }} />
         <div style={{ padding:"10px 16px", borderTop:`1px solid ${C.border}`, background:C.surface, display:"flex", justifyContent:"space-between" }}>
           <span style={{ color:C.dim, fontSize:"14px" }}>SPENCER Demo — AI Career Report in Action</span>
           <span style={{ color:C.cyan, fontSize:"14px" }}>YouTube ↗</span>
         </div>
       </div>
     </a>
+    <div
+      onClick={() => setOpen(!open)}
+      style={{ border:`1px solid ${C.border}`, padding:"10px 16px", marginTop:"4px", cursor:"pointer", background:C.surface, display:"flex", justifyContent:"space-between", alignItems:"center" }}
+    >
+      <span style={{ color:C.dim, fontSize:"14px" }}>Screenshots ({SCREENSHOTS.length})</span>
+      <span style={{ color:C.cyan, fontSize:"14px" }}>{open ? "▲ 접기" : "▼ 펼치기"}</span>
+    </div>
+    {open && (
+      <div style={{ display:"grid", gridTemplateColumns:mob?"repeat(2, 1fr)":"repeat(4, 1fr)", gap:"8px", marginTop:"8px" }}>
+        {SCREENSHOTS.map((s,i) => (
+          <div key={i} onClick={() => setPopupIdx(i)} style={{ border:`1px solid ${C.border}`, background:C.surface, overflow:"hidden", cursor:"pointer" }}>
+            <img src={s.src} alt={s.label} style={{ width:"100%", height:mob?"100px":"80px", objectFit:"cover", display:"block" }} />
+            <div style={{ padding:"4px 8px", borderTop:`1px solid ${C.border}`, fontSize:mob?"12px":"11px", color:C.dim, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+    )}
+    {popup && (
+      <div onClick={() => setPopupIdx(-1)} onKeyDown={e => { if(e.key==="ArrowLeft") goPrev(); if(e.key==="ArrowRight") goNext(); if(e.key==="Escape") setPopupIdx(-1); }} tabIndex={0} ref={el => el && el.focus()} style={{ position:"fixed", top:0, left:0, right:0, bottom:0, background:"rgba(0,0,0,0.85)", zIndex:9999, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", outline:"none" }}>
+        {mob ? (
+          <div onClick={e => e.stopPropagation()} onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} style={{ display:"flex", flexDirection:"column", alignItems:"center", maxWidth:"94vw" }}>
+            <img src={popup.src} alt={popup.label} style={{ maxWidth:"94vw", maxHeight:"75vh", display:"block", border:`1px solid ${C.border}` }} />
+            <div style={{ width:"100%", padding:"8px 16px", background:C.surface, borderTop:`1px solid ${C.border}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+              <span style={{ color:C.dim, fontSize:"14px" }}>{popupIdx + 1} / {SCREENSHOTS.length} — {popup.label}</span>
+              <span onClick={() => setPopupIdx(-1)} style={{ color:C.cyan, fontSize:"14px", cursor:"pointer" }}>✕ 닫기</span>
+            </div>
+            <div style={{ display:"flex", gap:"32px", marginTop:"12px" }}>
+              <div onClick={goPrev} style={{ color:C.cyan, fontSize:"32px", cursor:"pointer", padding:"8px 16px", userSelect:"none", background:C.surface, border:`1px solid ${C.border}`, borderRadius:"4px" }}>‹</div>
+              <div onClick={goNext} style={{ color:C.cyan, fontSize:"32px", cursor:"pointer", padding:"8px 16px", userSelect:"none", background:C.surface, border:`1px solid ${C.border}`, borderRadius:"4px" }}>›</div>
+            </div>
+          </div>
+        ) : (
+          <div style={{ display:"flex", alignItems:"center", gap:"12px" }} onClick={e => e.stopPropagation()}>
+            <div onClick={goPrev} style={{ color:C.cyan, fontSize:"32px", cursor:"pointer", padding:"8px", userSelect:"none" }}>‹</div>
+            <div style={{ maxWidth:"80vw", maxHeight:"90vh", position:"relative" }}>
+              <img src={popup.src} alt={popup.label} style={{ maxWidth:"80vw", maxHeight:"85vh", display:"block", border:`1px solid ${C.border}` }} />
+              <div style={{ padding:"8px 16px", background:C.surface, borderTop:`1px solid ${C.border}`, display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                <span style={{ color:C.dim, fontSize:"14px" }}>{popupIdx + 1} / {SCREENSHOTS.length} — {popup.label}</span>
+                <span onClick={() => setPopupIdx(-1)} style={{ color:C.cyan, fontSize:"14px", cursor:"pointer" }}>✕ 닫기</span>
+              </div>
+            </div>
+            <div onClick={goNext} style={{ color:C.cyan, fontSize:"32px", cursor:"pointer", padding:"8px", userSelect:"none" }}>›</div>
+          </div>
+        )}
+      </div>
+    )}
   </>;
 }
 
 function FeatureSection() {
   const lang = useLang();
+  const mob = useIsMobile();
 
   const PIPELINE = lang === "ko" ? [
     { step:"01", name:"이력서 분석", model:"Gemini 3.0 Pro", desc:"이력서 파싱 → 기술 스택 추출 → 경력 레벨 판별 → 적정 연봉 산출 → 커리어 방향 분석" },
@@ -491,13 +595,16 @@ function FeatureSection() {
   return <CLIReveal>
     {/* Key Metrics */}
     <Card title="key metrics">
-      <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"0" }}>
-        {METRICS.map((m,i) => (
-          <div key={i} style={{ padding:"10px 0", borderBottom:i<3?`1px solid ${C.border}`:"none", borderRight:(i%3!==2)?`1px solid ${C.border}`:"none", paddingLeft:(i%3!==0)?"16px":"0" }}>
-            <div style={{ color:C.faint, fontSize:"12px", textTransform:"uppercase", letterSpacing:"0.5px" }}>{m.k}</div>
-            <div style={{ color:C.primary, fontSize:"20px", fontWeight:700, marginTop:"4px" }}>{m.v}</div>
-          </div>
-        ))}
+      <div style={{ display:"grid", gridTemplateColumns:mob?"1fr 1fr":"1fr 1fr 1fr", gap:"0" }}>
+        {METRICS.map((m,i) => {
+          const cols = mob ? 2 : 3;
+          return (
+            <div key={i} style={{ padding:"10px 0", borderBottom:i<METRICS.length-cols?`1px solid ${C.border}`:"none", borderRight:(i%cols!==cols-1)?`1px solid ${C.border}`:"none", paddingLeft:(i%cols!==0)?"16px":"0" }}>
+              <div style={{ color:C.faint, fontSize:"12px", textTransform:"uppercase", letterSpacing:"0.5px" }}>{m.k}</div>
+              <div style={{ color:C.primary, fontSize:"20px", fontWeight:700, marginTop:"4px" }}>{m.v}</div>
+            </div>
+          );
+        })}
       </div>
     </Card>
 
@@ -510,7 +617,7 @@ function FeatureSection() {
             <span style={{ color:C.text, fontWeight:600, fontSize:"15px" }}>{p.name}</span>
             <span style={{ color:C.faint, fontSize:"12px", marginLeft:"auto" }}>{p.model}</span>
           </div>
-          <div style={{ color:C.dim, fontSize:"14px", lineHeight:"1.8", paddingLeft:"44px" }}>{p.desc}</div>
+          <div style={{ color:C.dim, fontSize:"14px", lineHeight:"1.8", paddingLeft:mob?"0":"44px" }}>{p.desc}</div>
         </div>
       ))}
     </Card>
@@ -602,9 +709,9 @@ function FeatureSection() {
     {/* Output: 7-Section Report */}
     <Card title="output: 7-section report">
       {REPORT_SECTIONS.map((s,i) => (
-        <div key={i} style={{ display:"flex", gap:"14px", padding:"6px 0", borderBottom:i<REPORT_SECTIONS.length-1?`1px solid ${C.border}`:"none", alignItems:"baseline" }}>
+        <div key={i} style={{ display:"flex", gap:mob?"8px":"14px", padding:"6px 0", borderBottom:i<REPORT_SECTIONS.length-1?`1px solid ${C.border}`:"none", alignItems:"baseline", flexWrap:mob?"wrap":"nowrap" }}>
           <span style={{ color:C.primary, fontWeight:700, fontSize:"13px", width:"24px", flexShrink:0 }}>{s.n}</span>
-          <span style={{ color:C.text, fontWeight:600, fontSize:"14px", minWidth:"140px" }}>{s.name}</span>
+          <span style={{ color:C.text, fontWeight:600, fontSize:"14px", minWidth:mob?"auto":"140px" }}>{s.name}</span>
           <span style={{ color:C.faint, fontSize:"13px" }}>{s.desc}</span>
         </div>
       ))}
@@ -615,19 +722,20 @@ function FeatureSection() {
 
 function TractionSection() {
   const lang = useLang();
+  const mob = useIsMobile();
 
   const STATUS = lang === "ko" ? [
     { k:"제품 단계", v:"MVP 배포 완료" },
     { k:"사용자 수", v:"0" },
     { k:"ARR", v:"$0" },
     { k:"첫 커밋", v:"2026.01.28" },
-    { k:"MVP 배포", v:"2026.02" },
+    { k:"MVP 배포", v:"2026.02.13" },
   ] : [
     { k:"Product Stage", v:"MVP Deployed" },
     { k:"Users", v:"0" },
     { k:"ARR", v:"$0" },
     { k:"First Commit", v:"2026.01.28" },
-    { k:"MVP Deployed", v:"2026.02" },
+    { k:"MVP Deployed", v:"2026.02.13" },
   ];
 
   const PLAN = lang === "ko" ? [
@@ -658,7 +766,7 @@ function TractionSection() {
 
     <Card title="plan" titleR={lang==="ko"?"이렇게 하겠습니다":"what we'll do"}>
       {PLAN.map((m,i) => (
-        <div key={i} style={{ display:"flex", alignItems:"center", gap:"12px", padding:"8px 0", borderBottom:i<PLAN.length-1?`1px solid ${C.border}`:"none" }}>
+        <div key={i} style={{ display:"flex", alignItems:mob?"flex-start":"center", gap:"12px", padding:"8px 0", borderBottom:i<PLAN.length-1?`1px solid ${C.border}`:"none", flexWrap:"wrap" }}>
           <span style={{ color:C.primary, fontWeight:700, fontSize:"13px", background:C.pBg, border:`1px solid ${C.primary}25`, padding:"2px 8px", flexShrink:0 }}>{m.phase}</span>
           <span style={{ color:C.faint, fontSize:"13px", flexShrink:0 }}>{m.period}</span>
           <span style={{ color:C.dim, fontSize:"14px" }}>{m.title}</span>
@@ -674,9 +782,10 @@ function TractionSection() {
 
 function WhySection() {
   const t = useT();
+  const mob = useIsMobile();
   return (
     <Card title="cat why-vibelabs.md">
-      <div style={{ fontSize:"16px", lineHeight:"2" }}>
+      <div style={{ fontSize:mob?"15px":"16px", lineHeight:mob?"1.8":"2" }}>
         <div style={{ color:C.text, marginBottom:"14px" }}>{t("whyP1")}</div>
         <div style={{ color:C.text, marginBottom:"14px" }}>{t("whyP2")}</div>
         <div style={{ color:C.text, marginBottom:"14px" }}>{t("whyP3")}</div>
@@ -715,6 +824,7 @@ export default function App() {
   const scrollRef = useRef(null);
   const menuRef = useRef(null);
   const inputRef = useRef(null);
+  const mob = useIsMobile();
 
   const t = (key) => i18n[lang][key] || key;
 
@@ -808,14 +918,14 @@ export default function App() {
         height:"48px",
         position:"sticky", top:0, zIndex:10,
       }}>
-        <div style={{ maxWidth:"860px", margin:"0 auto", padding:"0 32px", height:"100%", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+        <div style={{ maxWidth:"860px", margin:"0 auto", padding:mob?"0 12px":"0 32px", height:"100%", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
           <div style={{ display:"flex", alignItems:"center", gap:"14px" }}>
             <div style={{ display:"flex", gap:"7px" }}>
               <div style={{ width:12, height:12, borderRadius:"50%", background:"#ff5f57" }} />
               <div style={{ width:12, height:12, borderRadius:"50%", background:"#febc2e" }} />
               <div style={{ width:12, height:12, borderRadius:"50%", background:"#28c840" }} />
             </div>
-            <span style={{ color:C.faint, fontSize:"14px" }}>spencer — #hashed-vibe-labs-seoul-2026</span>
+            {!mob && <span style={{ color:C.faint, fontSize:"14px" }}>spencer — #hashed-vibe-labs-seoul-2026</span>}
           </div>
           <Countdown />
         </div>
@@ -823,7 +933,7 @@ export default function App() {
 
       {/* ═══ Terminal Body ═══ */}
       <div ref={scrollRef} data-scroll style={{ flex:1, overflowY:"auto", padding:"24px 0 140px" }}>
-        <div style={{ maxWidth:"860px", margin:"0 auto", padding:"0 32px" }}>
+        <div style={{ maxWidth:"860px", margin:"0 auto", padding:mob?"0 12px":"0 32px" }}>
         {/* Boot */}
         {BOOT.slice(0,bootN).map((b,i) => (
           <div key={i} style={{ color:b.c, fontSize:"15px", lineHeight:"2.2" }}>{b.t}</div>
@@ -857,10 +967,9 @@ export default function App() {
         background:C.raised, borderTop:`1px solid ${C.border}`, borderBottom:`1px solid ${C.border}`,
         fontSize:"13px", color:C.faint, zIndex:19,
       }}>
-        <div style={{ maxWidth:"860px", margin:"0 auto", padding:"6px 32px 8px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+        <div style={{ maxWidth:"860px", margin:"0 auto", padding:mob?"6px 12px 8px":"6px 32px 8px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>
           <div style={{ display:"flex", gap:"20px" }}>
-            <span>MEM: 48MB</span>
-            <span>CPU: 2%</span>
+            {!mob && <><span>MEM: 48MB</span><span>CPU: 2%</span></>}
           </div>
           <div style={{ display:"flex", gap:"14px", alignItems:"center" }}>
             <span style={{ color:C.text }}>{t("applicantLabel")}</span>
@@ -882,7 +991,7 @@ export default function App() {
       <div ref={menuRef} style={{ position:"fixed", bottom:0, left:0, right:0, width:"100%", zIndex:20 }}>
         {menu && (
           <div style={{
-            position:"absolute", bottom:"110px", right:"20px", width:"320px",
+            position:"absolute", bottom:"110px", right:mob?"12px":"20px", width:mob?"calc(100vw - 24px)":"320px",
             background:C.surface, border:`1px solid ${C.borderHi}`,
             borderRadius:"4px", overflow:"hidden",
             boxShadow:"0 10px 36px rgba(0,0,0,0.6)",
@@ -900,7 +1009,7 @@ export default function App() {
               const bg = active ? C.pBg : (used && menuIdx === -1) ? C.pBg : "transparent";
               return (
               <div key={c.key} onClick={() => pick(c.key)}
-                style={{ display:"flex", alignItems:"center", gap:"12px", padding:"10px 14px", cursor:"pointer", fontSize:"15px", transition:"background 0.08s", borderBottom:i<filtered.length-1?`1px solid ${C.border}`:"none", background:bg }}
+                style={{ display:"flex", alignItems:"center", gap:"12px", padding:"10px 14px", cursor:"pointer", fontSize:"15px", transition:"background 0.08s", borderBottom:i<filtered.length-1?`1px solid ${C.border}`:"none", background:bg, ...(mob?{minHeight:"44px"}:{}) }}
                 onMouseEnter={e => { setMenuIdx(i); e.currentTarget.style.background=C.pBg; }}
                 onMouseLeave={e => { setMenuIdx(-1); e.currentTarget.style.background="transparent"; }}
               >
@@ -914,7 +1023,7 @@ export default function App() {
         )}
 
         <div style={{ background:C.surface, borderTop:`1px solid ${C.border}` }}>
-          <div style={{ maxWidth:"860px", margin:"0 auto", padding:"14px 32px", display:"flex", alignItems:"center", gap:"12px" }}>
+          <div style={{ maxWidth:"860px", margin:"0 auto", padding:mob?"10px 12px":"14px 32px", display:"flex", alignItems:"center", gap:"12px" }}>
           <span style={{ color:C.dim, fontSize:"16px", whiteSpace:"nowrap" }}>{">"}</span>
           <div style={{ flex:1, position:"relative", display:"flex", alignItems:"center" }}>
             <input ref={inputRef} type="text" value={input}
@@ -930,9 +1039,9 @@ export default function App() {
               placeholder={nextCmd ? `${t("placeholderNext")} ${nextCmd.n} ${nextCmd.label} ${t(nextCmd.descKey)}` : t("placeholder")}
               autoFocus
               className="term-input"
-              style={{ width:"100%", background:"transparent", border:"none", outline:"none", color:C.text, fontFamily:F, fontSize:"15px", cursor:"pointer" }}
+              style={{ width:"100%", background:"transparent", border:"none", outline:"none", color:C.text, fontFamily:F, fontSize:mob?"16px":"15px", cursor:"pointer" }}
             />
-            {ghostText && <span style={{
+            {ghostText && !mob && <span style={{
               position:"absolute",
               left:`${input.length * 9.1}px`,
               top:"50%", transform:"translateY(-50%)",
@@ -949,7 +1058,7 @@ export default function App() {
             }} />
           </div>
           <div onClick={() => submit()}
-            style={{ width:"36px", height:"36px", display:"flex", alignItems:"center", justifyContent:"center", borderRadius:"4px", cursor:"pointer", background:C.pBg, border:`1px solid ${C.primary}30`, color:C.primary, fontSize:"15px", fontWeight:700 }}
+            style={{ width:mob?"44px":"36px", height:mob?"44px":"36px", display:"flex", alignItems:"center", justifyContent:"center", borderRadius:"4px", cursor:"pointer", background:C.pBg, border:`1px solid ${C.primary}30`, color:C.primary, fontSize:"15px", fontWeight:700, flexShrink:0 }}
           >↵</div>
           </div>
         </div>
@@ -967,6 +1076,11 @@ export default function App() {
         input::placeholder{color:${C.faint}}
         .term-input{caret-color:transparent}
         .cursor-blink{animation:blink 1s step-end infinite}
+        @media (max-width:767px){
+          input{font-size:16px !important}
+          .term-input{caret-color:${C.primary} !important}
+          .cursor-blink{display:none !important}
+        }
       `}</style>
     </div>
     </LangContext.Provider>
