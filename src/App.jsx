@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback, createContext, useContext, Children } from "react";
+import { useState, useEffect, useRef, useCallback, createContext, useContext, Children } from "react";
 
 /* ─── Language Context ─── */
 const LangContext = createContext("ko");
@@ -28,16 +28,12 @@ const i18n = {
     whyP2:"2025년 11월 Claude Opus 4.5를 접하고, 한 달 뒤 퇴사했습니다. 바이브 코딩으로 자연어 채용검색 서비스 Jobbot(jobbot.kr)을 만들어 배포했고, 그 과정에서 구직자가 진짜 원하는 건 '검색'이 아니라 '분석'이라는 걸 발견했습니다. SPENCER는 그렇게 시작됐고, 현재 MVP를 배포한 상태입니다.",
     whyP3:"솔직히 말씀드리면, 제품을 빠르게 만드는 건 자신 있지만, 실제 유저 트래픽을 만들고 비즈니스로 작동시킨 경험은 아직 없습니다. 창업에서 가장 어려운 지점이 바로 여기라는 걸 알고 있습니다.",
     whyP4:"그 경험을 압축적으로 쌓는 데 해쉬드바이브랩스의 환경과 네트워크가 결정적이라고 판단했습니다. PMF를 찾을 때까지 빠르게 실험하고 유연하게 피벗할 준비가 되어 있습니다. 프로그램 기간 내에 유료 전환율을 검증하고, 반복 가능한 성장 모델을 만드는 것이 목표입니다.",
-    whyP5:"이 지원서 자체가 제 빌딩 속도를 보여줍니다. 아이디어부터 이 페이지까지, 3시간.",
-
-    contactNote:"궁금한 점이 있으시다면 편하게 연락주세요.",
-
     menuTitle:"명령어 선택", menuHint:"↵ 선택",
     placeholder:"명령어를 입력하세요...",
     placeholderNext:"명령어를 입력하세요... 다음 컨텐츠는",
     errorHint:"입력창을 클릭해 명령어를 선택하세요.",
 
-    applicantLabel:"Pukaworks · 이승태",
+    applicantLabel:"SPENCER · 이승태",
   },
   en: {
     cmdTeam:"Team", cmdAbout:"About", cmdDemovideo:"Demo Video",
@@ -61,16 +57,12 @@ const i18n = {
     whyP2:"In November 2025, I encountered Claude Opus 4.5 and quit my job a month later. I built and deployed Jobbot (jobbot.kr), a natural language job search service, through vibe coding. In the process, I discovered that what job seekers truly want isn't search — it's analysis. That's how SPENCER started, and the MVP is now live.",
     whyP3:"Honestly, I'm confident in building products fast, but I haven't yet generated real user traffic or made a business work. I know this is exactly the hardest part of building a startup.",
     whyP4:"I believe Hashed Vibe Labs' environment and network are critical for compressing that learning curve. I'm ready to experiment fast and pivot flexibly until PMF is found. My goal within the program is to validate paid conversion and build a repeatable growth model.",
-    whyP5:"This application itself demonstrates my building speed. From idea to this page — 3 hours.",
-
-    contactNote:"Feel free to reach out if you have any questions.",
-
     menuTitle:"Select Command", menuHint:"↵ Select",
     placeholder:"Type a command...",
     placeholderNext:"Type a command... Next content is",
     errorHint:"Click the input to select a command.",
 
-    applicantLabel:"Pukaworks · Seungtae Lee",
+    applicantLabel:"SPENCER · Seungtae Lee",
   },
 };
 
@@ -83,7 +75,7 @@ function useT() {
 const C = {
   bg:"#111111", surface:"#191919", raised:"#212121",
   border:"#2e2e2e", borderHi:"#3a3a3a",
-  primary:"#F78547", pDim:"#6366F1", pBg:"rgba(247,133,71,0.07)",
+  primary:"#F78547", pBg:"rgba(247,133,71,0.07)",
   green:"#7ad67a", cyan:"#7ad6d6", red:"#d67a7a",
   text:"#e0e0e0", dim:"#a0a0a0", faint:"#6a6a6a",
 };
@@ -222,7 +214,7 @@ function HomeSection() {
     </div>
     <pre style={{ color:C.primary, fontSize:"10.5px", lineHeight:"1.15", fontFamily:F, margin:"0 0 20px", opacity:0.85, letterSpacing:"0.5px" }}>{VIBE_ASCII}</pre>
     <div style={{ color:C.primary, fontSize:"16px", margin:"0 0 22px" }}>
-      —— Pukaworks applying for 1st Batch 2026: Seoul ——
+      —— SPENCER applying for 1st Batch 2026: Seoul ——
     </div>
     <div style={{ border:`1px solid ${C.primary}40`, borderRadius:"2px", padding:"14px 18px", background:C.pBg, marginBottom:"22px" }}>
       <span style={{ color:C.primary, fontSize:"16px" }}>{t("homeTagline")}</span>
@@ -250,7 +242,7 @@ function HomeSection() {
 function AboutSection() {
   const t = useT();
   return <CLIReveal>
-    <Card title="applicant · pukaworks">
+    <Card title="applicant · spencer">
       <div style={{ color:C.primary, fontWeight:700, fontSize:"20px", marginBottom:"10px" }}>SPENCER</div>
       <div style={{ color:C.text, fontSize:"16px", marginBottom:"12px" }}>{t("aboutShort")}</div>
       <div style={{ color:C.dim, fontSize:"15px", lineHeight:"2" }}>
@@ -301,7 +293,7 @@ function TeamSection() {
         </div>
       ))}
     </div>
-    <Card title="founder · pukaworks">
+    <Card title="founder · spencer">
       <div style={{ display:"flex", alignItems:"center", gap:"16px", marginBottom:"14px" }}>
         <div style={{ width:"48px", height:"48px", border:`1px solid ${C.border}`, background:C.raised, display:"flex", alignItems:"center", justifyContent:"center", color:C.primary, fontSize:"15px", fontWeight:700 }}>ST</div>
         <div>
@@ -823,7 +815,7 @@ export default function App() {
               <div style={{ width:12, height:12, borderRadius:"50%", background:"#febc2e" }} />
               <div style={{ width:12, height:12, borderRadius:"50%", background:"#28c840" }} />
             </div>
-            <span style={{ color:C.faint, fontSize:"14px" }}>pukaworks — #hashed-vibe-labs-seoul-2026</span>
+            <span style={{ color:C.faint, fontSize:"14px" }}>spencer — #hashed-vibe-labs-seoul-2026</span>
           </div>
           <Countdown />
         </div>
@@ -846,7 +838,7 @@ export default function App() {
               </div>
             )}
             <div style={{ marginBottom:"14px", fontSize:"15px" }}>
-              <span style={{ color:C.green }}>pukaworks@vibelabs</span>
+              <span style={{ color:C.green }}>spencer@vibelabs</span>
               <span style={{ color:C.faint }}>:</span>
               <span style={{ color:C.cyan }}>~</span>
               <span style={{ color:C.faint }}>$ </span>
